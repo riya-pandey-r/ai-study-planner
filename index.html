@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Study Planner - Smart Personalized Schedule</title>
+  <!-- Google Font: Plus Jakarta Sans for clean, modern student dashboard look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Inline Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>" />
+</head>
+<body>
+  <!-- App Container with Sidebar & Main Layout -->
+  <div class="app-layout">
+    
+    <!-- Mobile Navigation Toggle Button -->
+    <button class="mobile-toggle-btn" id="mobileToggleBtn" aria-label="Toggle Menu">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <!-- Sidebar Backdrop for Mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ========================================================
+         SIDEBAR NAVIGATION
+         ======================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">✨</div>
+        <div class="logo-text">
+          <h2>AI Study Planner</h2>
+          <span>Smart Learning Assistant</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <button class="nav-item active" data-view="dashboard">
+              <span class="nav-icon">📊</span>
+              <span class="nav-label">Dashboard</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="generator">
+              <span class="nav-icon">⚡</span>
+              <span class="nav-label">Create Plan</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="schedule">
+              <span class="nav-icon">📅</span>
+              <span class="nav-label">Study Schedule</span>
+              <span class="nav-badge" id="scheduleBadge">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="productivity">
+              <span class="nav-icon">📈</span>
+              <span class="nav-label">Productivity</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-view="tips">
+              <span class="nav-icon">💡</span>
+              <span class="nav-label">Study Tips</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Quick Stats Card -->
+      <div class="sidebar-footer-card">
+        <div class="mini-progress-title">
+          <span>Active Progress</span>
+          <strong id="sidebarProgressPercent">0%</strong>
+        </div>
+        <div class="progress-bar-bg mini">
+          <div class="progress-bar-fill" id="sidebarProgressBar" style="width: 0%"></div>
+        </div>
+        <button class="btn btn-outline-sm" id="btnQuickSample">
+          <span>⚡ Try Demo Plan</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========================================================
+         MAIN CONTENT AREA
+         ======================================================== -->
+    <main class="main-content">
+      
+      <!-- Top Bar / Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="pageTitle">Dashboard Overview</h1>
+          <p id="pageSubtitle">Monitor your daily study goals and exam preparation status</p>
+        </div>
+        <div class="topbar-right">
+          <div class="date-chip" id="currentDateChip">
+            <span class="date-icon">🗓️</span>
+            <span id="currentDateText">Today</span>
+          </div>
+          <button class="btn btn-primary-sm" id="topbarNewPlanBtn">
+            <span>+ New Plan</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Wrapper -->
+      <div class="views-wrapper">
+
+        <!-- ====================================================
+             VIEW 1: DASHBOARD OVERVIEW
+             ==================================================== -->
+        <section class="view-section active" id="viewDashboard">
+          
+          <!-- Hero / Exam Countdown Banner -->
+          <div class="hero-banner" id="heroBanner">
+            <div class="hero-content">
+              <span class="hero-tag">🎯 Active Goal</span>
+              <h2 id="heroSubjectTitle">No active study plan found</h2>
+              <p id="heroSubjectDesc">Create a study plan to generate your personalized timeline and track topics.</p>
+              <div class="hero-meta" id="heroMeta" style="display: none;">
+                <div class="hero-meta-item">
+                  <span class="meta-label">Exam Date:</span>
+                  <span class="meta-val" id="heroExamDate">-</span>
+                </div>
+                <div class="hero-meta-item">
+                  <span class="meta-label">Countdown:</span>
+                  <span class="meta-val highlight" id="heroCountdown">-</span>
+                </div>
+                <div class="hero-meta-item">
+                  <span class="meta-label">Difficulty:</span>
+                  <span class="meta-val" id="heroDifficulty">-</span>
+                </div>
+              </div>
+            </div>
+            <div class="hero-action">
+              <button class="btn btn-light" id="heroActionBtn">Create Your Plan</button>
+            </div>
+          </div>
+
+          <!-- Productivity Metric Cards (Requirements 6 & 8) -->
+          <div class="stats-grid">
+            <!-- Total Topics -->
+            <div class="stat-card">
+              <div class="stat-icon-wrapper icon-blue">
+                📚
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Topics</span>
+                <h3 class="stat-number" id="statTotalTopics">0</h3>
+                <span class="stat-subtext">Planned study sessions</span>
+              </div>
+            </div>
+
+            <!-- Completed Topics -->
+            <div class="stat-card">
+              <div class="stat-icon-wrapper icon-green">
+                ✅
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Completed Topics</span>
+                <h3 class="stat-number text-success" id="statCompletedTopics">0</h3>
+                <span class="stat-subtext">Topics mastered</span>
+              </div>
+            </div>
+
+            <!-- Remaining Topics -->
+            <div class="stat-card">
+              <div class="stat-icon-wrapper icon-amber">
+                ⏳
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Remaining Topics</span>
+                <h3 class="stat-number text-warning" id="statRemainingTopics">0</h3>
+                <span class="stat-subtext">Sessions left to study</span>
+              </div>
+            </div>
+
+            <!-- Progress Percentage -->
+            <div class="stat-card">
+              <div class="stat-icon-wrapper icon-purple">
+                🎯
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Progress</span>
+                <h3 class="stat-number text-primary" id="statProgressPercent">0%</h3>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="statProgressBar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Preview: Upcoming Sessions & Plan Snapshot -->
+          <div class="dashboard-columns">
+            <!-- Left Column: Upcoming Tasks -->
+            <div class="card dashboard-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Next Up on Your Schedule</h3>
+                  <p class="card-subtitle">Your immediate upcoming sessions</p>
+                </div>
+                <button class="btn btn-text" id="btnViewAllSchedule">View All &rarr;</button>
+              </div>
+              <div class="card-body">
+                <div class="upcoming-list" id="dashboardUpcomingList">
+                  <!-- Populated dynamically via JavaScript -->
+                  <div class="empty-state">
+                    <span class="empty-icon">📝</span>
+                    <h4>No study plan yet!</h4>
+                    <p>Click "Create Plan" or "Try Demo Plan" to start generating your custom schedule.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: AI Plan Insights -->
+            <div class="card dashboard-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">AI Study Breakdown</h3>
+                  <p class="card-subtitle">Algorithm distribution and recommendations</p>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="ai-insights-box" id="aiInsightsBox">
+                  <div class="insight-row">
+                    <span class="insight-label">Study Strategy:</span>
+                    <span class="insight-badge badge-primary" id="insightStrategy">Adaptive Spaced Learning</span>
+                  </div>
+                  <div class="insight-row">
+                    <span class="insight-label">Estimated Total Study:</span>
+                    <strong id="insightTotalHours">0 Hours</strong>
+                  </div>
+                  <div class="insight-row">
+                    <span class="insight-label">Practice & Quiz Days:</span>
+                    <strong id="insightQuizDays">0 Days</strong>
+                  </div>
+                  <div class="insight-row">
+                    <span class="insight-label">Revision Buffer:</span>
+                    <strong id="insightRevisionDays">0 Days</strong>
+                  </div>
+                  <div class="insight-note">
+                    <span class="bulb">💡</span>
+                    <span id="insightAdvice">Enter your subject details to receive optimized study sessions.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             VIEW 2: PLAN GENERATOR (Requirement 2 & 3)
+             ==================================================== -->
+        <section class="view-section" id="viewGenerator">
+          <div class="generator-container">
+            <div class="card generator-card">
+              <div class="card-header border-bottom">
+                <div class="header-icon-box">⚡</div>
+                <div>
+                  <h2 class="card-title">Generate Personalized Study Plan</h2>
+                  <p class="card-subtitle">Enter your exam details. Our algorithm balances learning, active recall, and revision.</p>
+                </div>
+              </div>
+
+              <!-- Form to enter: Subject, Topics, Exam Date, Study Hours, Difficulty -->
+              <form id="studyPlanForm" class="plan-form" novalidate>
+                
+                <div class="form-row">
+                  <!-- 1. Subject Name -->
+                  <div class="form-group flex-1">
+                    <label for="subjectInput" class="form-label">
+                      Subject / Course Name <span class="required">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      id="subjectInput" 
+                      class="form-control" 
+                      placeholder="e.g. Data Structures & Algorithms, Physics, World History"
+                      required
+                    />
+                    <small class="form-help">Enter the primary subject or exam you are preparing for.</small>
+                  </div>
+
+                  <!-- 2. Exam Date -->
+                  <div class="form-group flex-1">
+                    <label for="examDateInput" class="form-label">
+                      Exam Date <span class="required">*</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      id="examDateInput" 
+                      class="form-control" 
+                      required
+                    />
+                    <small class="form-help">When is your exam? We will distribute topics up to this date.</small>
+                  </div>
+                </div>
+
+                <!-- 3. Topics (Comma or Newline separated) -->
+                <div class="form-group">
+                  <div class="label-with-presets">
+                    <label for="topicsInput" class="form-label">
+                      Topics / Syllabus List <span class="required">*</span>
+                    </label>
+                    <div class="presets-pill-group">
+                      <span class="preset-label">Quick Presets:</span>
+                      <button type="button" class="preset-btn" data-preset="cs">Computer Science</button>
+                      <button type="button" class="preset-btn" data-preset="math">Calculus</button>
+                      <button type="button" class="preset-btn" data-preset="bio">Biology</button>
+                    </div>
+                  </div>
+                  <textarea 
+                    id="topicsInput" 
+                    class="form-control textarea-topics" 
+                    rows="4" 
+                    placeholder="Enter topics separated by commas or on new lines:&#10;Arrays and Strings, Linked Lists, Trees and Graphs, Dynamic Programming, Sorting Algorithms"
+                    required
+                  ></textarea>
+                  <small class="form-help">Tip: You can paste a syllabus list or type topics separated by commas or line breaks.</small>
+                </div>
+
+                <div class="form-row">
+                  <!-- 4. Available Study Hours per Day -->
+                  <div class="form-group flex-1">
+                    <label for="hoursInput" class="form-label">
+                      Daily Study Hours: <span class="hours-display" id="hoursDisplay">2.5 hrs</span>
+                    </label>
+                    <input 
+                      type="range" 
+                      id="hoursInput" 
+                      class="form-range" 
+                      min="1" 
+                      max="10" 
+                      step="0.5" 
+                      value="2.5" 
+                    />
+                    <div class="range-labels">
+                      <span>1 hr (Light)</span>
+                      <span>5 hrs (Intense)</span>
+                      <span>10 hrs (Sprint)</span>
+                    </div>
+                  </div>
+
+                  <!-- 5. Difficulty Level -->
+                  <div class="form-group flex-1">
+                    <label class="form-label">
+                      Subject Difficulty <span class="required">*</span>
+                    </label>
+                    <div class="difficulty-options">
+                      <label class="diff-radio">
+                        <input type="radio" name="difficulty" value="Easy" />
+                        <span class="radio-card easy">
+                          <span class="icon">🌱</span>
+                          <strong>Easy</strong>
+                          <small>Light review</small>
+                        </span>
+                      </label>
+                      <label class="diff-radio">
+                        <input type="radio" name="difficulty" value="Medium" checked />
+                        <span class="radio-card medium">
+                          <span class="icon">⚖️</span>
+                          <strong>Medium</strong>
+                          <small>Balanced pacing</small>
+                        </span>
+                      </label>
+                      <label class="diff-radio">
+                        <input type="radio" name="difficulty" value="Hard" />
+                        <span class="radio-card hard">
+                          <span class="icon">🔥</span>
+                          <strong>Hard</strong>
+                          <small>More quizzes & rev</small>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary btn-lg" id="generatePlanBtn">
+                    <span class="btn-icon">⚡</span>
+                    <span>Generate Study Plan</span>
+                  </button>
+                  <button type="button" class="btn btn-outline" id="clearFormBtn">
+                    Reset Form
+                  </button>
+                </div>
+
+              </form>
+
+              <!-- Loading Indicator during generation -->
+              <div class="generation-loader" id="generationLoader" style="display: none;">
+                <div class="spinner"></div>
+                <h4>Analyzing topics & optimizing schedule...</h4>
+                <p>Computing spaced repetition checkpoints and revision milestones.</p>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================
+             VIEW 3: STUDY SCHEDULE (Requirements 4, 5, 7)
+             ==================================================== -->
+        <section class="view-section" id="viewSchedule">
+          
+          <!-- Schedule Header & Control Bar -->
+          <div class="schedule-toolbar">
+            <div class="toolbar-info">
+              <h2 id="scheduleHeaderSubject">Your Study Schedule</h2>
+              <p id="scheduleHeaderMeta">Day-by-day plan with priorities, revision, and quiz checkpoints</p>
+            </div>
+            
+            <div class="toolbar-controls">
+              <!-- Filter Buttons -->
+              <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All Days</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="special">Revision & Quizzes</button>
+              </div>
+
+              <!-- Extra actions -->
+              <div class="action-buttons">
+                <button class="btn btn-outline-sm" id="btnExportPlan" title="Export Plan as JSON or Print">
+                  <span>🖨️ Print / Save</span>
+                </button>
+                <button class="btn btn-danger-sm" id="btnClearPlan" title="Clear current study plan">
+                  <span>🗑️ Reset Plan</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schedule Cards Container -->
+          <div class="schedule-grid" id="scheduleCardsGrid">
+            <!-- Dynamically populated by JavaScript -->
+          </div>
+
+          <!-- Empty State (When no plan exists yet) -->
+          <div class="empty-schedule-card" id="emptySchedulePlaceholder">
+            <div class="empty-state-graphic">📅</div>
+            <h3>No Active Study Plan</h3>
+            <p>You haven't generated a study schedule yet. Fill out the quick form to build your customized day-by-day timeline!</p>
+            <button class="btn btn-primary" id="btnGoToGenerator">
+              <span>⚡ Generate Study Plan</span>
+            </button>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             VIEW 4: PRODUCTIVITY TRACKER (Requirements 6 & 8)
+             ==================================================== -->
+        <section class="view-section" id="viewProductivity">
+          
+          <div class="productivity-container">
+            
+            <!-- Productivity Top Cards -->
+            <div class="productivity-hero card">
+              <div class="hero-progress-layout">
+                <!-- Circular / Ring Progress Graphic -->
+                <div class="progress-ring-container">
+                  <svg class="progress-ring" width="160" height="160">
+                    <circle
+                      class="progress-ring-bg"
+                      stroke="#e2e8f0"
+                      stroke-width="12"
+                      fill="transparent"
+                      r="68"
+                      cx="80"
+                      cy="80"
+                    />
+                    <circle
+                      class="progress-ring-circle"
+                      id="progressRingCircle"
+                      stroke="#6366f1"
+                      stroke-width="12"
+                      stroke-linecap="round"
+                      fill="transparent"
+                      r="68"
+                      cx="80"
+                      cy="80"
+                    />
+                  </svg>
+                  <div class="progress-ring-text">
+                    <span class="ring-percent" id="ringPercentText">0%</span>
+                    <span class="ring-sub">Done</span>
+                  </div>
+                </div>
+
+                <!-- Productivity Details -->
+                <div class="productivity-details">
+                  <span class="badge badge-success" id="productivityStatusBadge">On Track</span>
+                  <h2 id="productivitySubjectHeading">Study Pace & Completion</h2>
+                  <p class="productivity-lead" id="productivitySummaryText">
+                    Track your daily momentum. Marking topics complete recalculates your remaining study workload automatically.
+                  </p>
+                  
+                  <div class="productivity-stat-pills">
+                    <div class="stat-pill">
+                      <span class="pill-label">Total Sessions:</span>
+                      <strong id="prodTotal">0</strong>
+                    </div>
+                    <div class="stat-pill">
+                      <span class="pill-label">Completed:</span>
+                      <strong class="text-success" id="prodCompleted">0</strong>
+                    </div>
+                    <div class="stat-pill">
+                      <span class="pill-label">Remaining:</span>
+                      <strong class="text-warning" id="prodRemaining">0</strong>
+                    </div>
+                    <div class="stat-pill">
+                      <span class="pill-label">Hours Logged:</span>
+                      <strong id="prodHoursLogged">0 / 0 hrs</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Productivity Metric Breakdown Cards -->
+            <div class="metrics-row">
+              <div class="card metric-breakdown-card">
+                <h3>Session Type Breakdown</h3>
+                <p>Distribution of regular study, active revision, and quiz checkpoints</p>
+                <div class="breakdown-bars">
+                  <div class="breakdown-item">
+                    <div class="breakdown-label">
+                      <span>📖 Core Study Sessions</span>
+                      <span id="countCoreTopics">0</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill fill-indigo" id="barCoreTopics" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div class="breakdown-item">
+                    <div class="breakdown-label">
+                      <span>🔄 Spaced Revision Days</span>
+                      <span id="countRevisionTopics">0</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill fill-amber" id="barRevisionTopics" style="width: 0%"></div>
+                    </div>
+                  </div>
+                  <div class="breakdown-item">
+                    <div class="breakdown-label">
+                      <span>✍️ Practice & Quizzes</span>
+                      <span id="countQuizTopics">0</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                      <div class="progress-bar-fill fill-emerald" id="barQuizTopics" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card metric-breakdown-card">
+                <h3>Study Tips for Current Plan</h3>
+                <div class="study-tips-list">
+                  <div class="tip-item">
+                    <span class="tip-icon">🧠</span>
+                    <div>
+                      <strong>Active Recall</strong>
+                      <p>Close your notes after each topic and write down 5 key concepts from memory.</p>
+                    </div>
+                  </div>
+                  <div class="tip-item">
+                    <span class="tip-icon">⏳</span>
+                    <div>
+                      <strong>Pomodoro Pacing</strong>
+                      <p>Study in 25-minute sprints followed by 5-minute cognitive breaks.</p>
+                    </div>
+                  </div>
+                  <div class="tip-item">
+                    <span class="tip-icon">📝</span>
+                    <div>
+                      <strong>Self-Quiz Technique</strong>
+                      <p>Practice testing yourself on revision days to reinforce retention by up to 200%.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             VIEW 5: STUDY TIPS & AI METHODOLOGY
+             ==================================================== -->
+        <section class="view-section" id="viewTips">
+          <div class="tips-container">
+            <div class="tips-header">
+              <h2>Evidence-Based Learning Strategies</h2>
+              <p>How the AI Study Planner designs your schedule and how to study effectively.</p>
+            </div>
+
+            <div class="tips-grid">
+              <div class="card tip-card">
+                <div class="tip-card-icon">🔁</div>
+                <h3>Spaced Repetition</h3>
+                <p>Instead of cramming the night before, our algorithm spreads topics across days with dedicated review checkpoints to fight the Ebbinghaus forgetting curve.</p>
+                <div class="tip-badge">Built into the Schedule</div>
+              </div>
+
+              <div class="card tip-card">
+                <div class="tip-card-icon">⚡</div>
+                <h3>Active Recall</h3>
+                <p>Re-reading creates an illusion of competence. Testing yourself with flashcards and practice problems triggers deeper neural pathway consolidation.</p>
+                <div class="tip-badge">Quiz Days Strategy</div>
+              </div>
+
+              <div class="card tip-card">
+                <div class="tip-card-icon">🍅</div>
+                <h3>Pomodoro Technique</h3>
+                <p>Divide your daily study hours into 25-minute focused blocks with 5-minute breaks. Take a longer 20-minute break after every 4 cycles to stay fresh.</p>
+                <div class="tip-badge">Time Management</div>
+              </div>
+
+              <div class="card tip-card">
+                <div class="tip-card-icon">🗣️</div>
+                <h3>The Feynman Technique</h3>
+                <p>Try explaining each topic to a friend or into a notebook as if teaching a beginner. Any point where you struggle highlights gaps in your understanding.</p>
+                <div class="tip-badge">Deep Mastery</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div> <!-- End views-wrapper -->
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Container for interactive user feedback -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript file -->
+  <script src="script.js"></script>
+</body>
+</html>
